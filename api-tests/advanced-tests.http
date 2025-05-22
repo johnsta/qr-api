@@ -1,0 +1,93 @@
+# QR Code API Tests
+# @description Tests for QR Code Generator API with MinIO backend
+# @version 1.0
+
+# -----------------------
+# Environment Definitions
+# -----------------------
+
+@host = http://localhost:8000
+@apiPrefix = /api/qrcodes
+
+# You can override the host using --env-var "host=https://your-api-domain.azurewebsites.net"
+
+# -----------------------
+# API Tests
+# -----------------------
+
+### Get API Status
+# @name healthCheck
+GET {{host}}/docs HTTP/1.1
+
+### Create a QR Code
+# @name createQRCode
+POST {{host}}{{apiPrefix}} HTTP/1.1
+Content-Type: application/json
+
+{
+  "data": "https://github.com",
+  "size": 300
+}
+
+// @ref response.parsedBody.code_id qrCodeId
+
+### Get QR Code Image
+# @name getQRCode
+GET {{host}}{{apiPrefix}}/{{qrCodeId}} HTTP/1.1
+
+### Get QR Code Metadata
+# @name getQRCodeMetadata
+GET {{host}}{{apiPrefix}}/{{qrCodeId.replace('.png', '')}}.metadata HTTP/1.1
+
+### Check QR Code Exists
+# @name checkQRCodeExists
+HEAD {{host}}{{apiPrefix}}/{{qrCodeId}} HTTP/1.1
+
+### Delete QR Code
+# @name deleteQRCode
+DELETE {{host}}{{apiPrefix}}/{{qrCodeId}} HTTP/1.1
+
+### Verify QR Code Deleted
+# @name verifyQRCodeDeleted
+GET {{baseUrl}}{{apiPrefix}}/{{qrCodeId}} HTTP/1.1
+// @expectedStatus 404
+
+# -----------------------
+# Special QR Code Types
+# -----------------------
+
+### Create Text QR Code
+# @name createTextQRCode
+POST {{baseUrl}}{{apiPrefix}} HTTP/1.1
+Content-Type: application/json
+
+{
+  "data": "This is plain text in a QR code",
+  "size": 400
+}
+
+// @ref response.parsedBody.code_id textQRCodeId
+
+### Create vCard QR Code
+# @name createVCardQRCode
+POST {{baseUrl}}{{apiPrefix}} HTTP/1.1
+Content-Type: application/json
+
+{
+  "data": "BEGIN:VCARD\nVERSION:3.0\nN:Doe;John;;;\nFN:John Doe\nORG:Microsoft\nTITLE:Developer\nEMAIL:john.doe@example.com\nTEL:+1234567890\nEND:VCARD",
+  "size": 350
+}
+
+// @ref response.parsedBody.code_id vcardQRCodeId
+
+### Create WiFi QR Code
+# @name createWiFiQRCode
+POST {{baseUrl}}{{apiPrefix}} HTTP/1.1
+Content-Type: application/json
+
+{
+  "data": "WIFI:T:WPA;S:MyNetworkName;P:MySecurePassword;;",
+  "size": 300
+}
+
+// @ref response.parsedBody.code_id wifiQRCodeId

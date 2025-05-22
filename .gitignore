@@ -1,0 +1,65 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environment
+venv/
+env/
+ENV/
+.env
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# MinIO and Docker related
+.minio.sys/
+minio-data/
+minio-config/
+
+# Azure Storage related
+.azure/
+
+# Project specific
+*.qr
+*.png
+!test-qr.png
+
+# Log files
+*.log
+logs/
+
+# Temporary files
+tmp/
+temp/
+
+# HTTPYAC test related
+.httpyac/
+
+# Private info
+# Keep test-qr.png but ignore other PNG files
+!test-qr.png
+secrets.*.json
+credentials.json
