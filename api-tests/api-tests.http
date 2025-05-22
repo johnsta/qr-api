@@ -1,11 +1,6 @@
-// filepath: /Users/johnsta/malt-sample-app/api-tests.http
 // QR Code Generator API Tests
 @host = http://localhost:8000
 @apiPrefix = /api/qrcodes
-
-### Health Check
-# This request checks if the API is running
-GET {{host}}/docs HTTP/1.1
 
 ### 1. Create a QR Code
 # This request creates a new QR code with a URL
@@ -30,72 +25,10 @@ GET {{host}}{{apiPrefix}}/{{qrCodeId}} HTTP/1.1
 # @name getMetadata
 GET {{host}}{{apiPrefix}}/{{qrCodeId.replace('.png', '')}}/metadata HTTP/1.1
 
-### 4. Check if QR Code Exists (HEAD request)
-# Uses a HEAD request to check if a QR code exists without downloading it
-# @name checkExists
-HEAD {{host}}{{apiPrefix}}/{{qrCodeId}} HTTP/1.1
-
-### 5. Upload a Custom QR Code
-# Uploads a pre-generated QR code image
-# @name uploadCustomQRCode
-PUT {{host}}{{apiPrefix}}/custom-qr-code.png HTTP/1.1
-Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
-X-QR-Data: https://example.com
-X-QR-Size: 400
-
-------WebKitFormBoundary7MA4YWxkTrZu0gW
-Content-Disposition: form-data; name="file"; filename="test-qr.png"
-Content-Type: image/png
-
-< ./test-qr.png
-------WebKitFormBoundary7MA4YWxkTrZu0gW--
-
-@customQRCodeId = {{response.parsedBody.code_id}}
-### 6. Create a QR Code with Text
-# Creates a QR code with plain text data
-# @name createTextQRCode
-POST {{host}}{{apiPrefix}} HTTP/1.1
-Content-Type: application/json
-
-{
-  "data": "This is a text message encoded as a QR code",
-  "size": 400
-}
-
-@textBasedQRCodeId = {{response.parsedBody.code_id}}
-
-### 7. Create a QR Code with vCard contact information
-# Creates a QR code with vCard data for scanning into contacts
-# @name createVCardQRCode
-POST {{host}}{{apiPrefix}} HTTP/1.1
-Content-Type: application/json
-
-{
-  "data": "BEGIN:VCARD\nVERSION:3.0\nN:Doe;John;;;\nFN:John Doe\nORG:Example Corp.\nTITLE:Software Engineer\nEMAIL;TYPE=WORK:john.doe@example.com\nTEL;TYPE=CELL:+1234567890\nEND:VCARD",
-  "size": 350
-}
-
-@vCardQRCodeId = {{response.parsedBody.code_id}}
-
-### 8. Delete a QR Code
+### 4. Delete a QR Code
 # Deletes a QR code from storage
 # @name deleteQRCode
 DELETE {{host}}{{apiPrefix}}/{{qrCodeId}} HTTP/1.1
-
-### 8.1 Delete a Text QR Code
-# Deletes a text-based QR code from storage
-# @name deleteTextQRCode
-DELETE {{host}}{{apiPrefix}}/{{textBasedQRCodeId}} HTTP/1.1
-
-### 8.2 Delete a vCard QR Code
-# Deletes a vCard-based QR code from storage
-# @name deleteVCardQRCode
-DELETE {{host}}{{apiPrefix}}/{{vCardQRCodeId}} HTTP/1.1
-
-### 8.3 Delete a Custom QR Code
-# Deletes a custom QR code from storage
-# @name deleteCustomQRCode
-DELETE {{host}}{{apiPrefix}}/{{customQRCodeId}} HTTP/1.1
 
 ### 9. Verify QR Code is Deleted
 # This should return 404 Not Found if the deletion was successful
