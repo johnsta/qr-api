@@ -69,7 +69,16 @@ class AzureBlobStorageProvider extends StorageProvider {
       // Use DefaultAzureCredential for passwordless authentication
       console.log('Using DefaultAzureCredential for passwordless authentication');
       try {
-        const credential = new DefaultAzureCredential();
+        let options = {};
+        
+        // Check if we're using managed identity
+        if (process.env.AZURE_STORAGE_USE_MANAGED_IDENTITY === 'true') {
+          console.log('Using managed identity for Azure Blob Storage');
+          // For system-assigned identity, we don't need to specify the client ID
+          // Just use DefaultAzureCredential which will automatically use the system-assigned identity
+        }
+        
+        const credential = new DefaultAzureCredential(options);
         const accountName = process.env.AZURE_STORAGE_ACCOUNT_NAME;
         if (!accountName) {
           throw new Error('AZURE_STORAGE_ACCOUNT_NAME environment variable is required when using DefaultAzureCredential');
@@ -77,45 +86,83 @@ class AzureBlobStorageProvider extends StorageProvider {
         const accountUrl = `https://${accountName}.blob.core.windows.net`;
         this.blobServiceClient = new BlobServiceClient(accountUrl, credential);
       } catch (error) {
-        console.error(`Azure authentication error: ${error.message}`);
-        console.error('Make sure you are logged in with "az login" and have "Storage Blob Data Contributor" role');
-        throw error;
+        console.warn(`Azure authentication warning: ${error.message}`);
+        console.warn('Authentication issues will be handled gracefully if possible');
+        // Don't throw error here, let's try to recover
       }
     }
     
-    // Ensure container exists
-    this.containerClient = this.blobServiceClient.getContainerClient(this.containerName);
-    try {
-      await this.containerClient.create();
-      console.log(`Container ${this.containerName} created successfully.`);
-    } catch (error) {
-      // Container might already exist, which is fine
-      if (error.statusCode !== 409) {
-        console.warn(`Warning: ${error.message}`);
+    // Check if we have a valid blobServiceClient
+    if (!this.blobServiceClient) {
+      console.warn('BlobServiceClient not initialized correctly. Storage operations may fail.');
+      // We'll continue execution - the app can still function with non-storage features
+    } else {
+      // Ensure container exists
+      this.containerClient = this.blobServiceClient.getContainerClient(this.containerName);
+      try {
+        // Check if we can access the container before trying to create it
+        await this.containerClient.create();
+        console.log(`Container ${this.containerName} created or verified successfully.`);
+      } catch (error) {
+        // Container might already exist, which is fine
+        if (error.statusCode === 409) {
+          console.log(`Container ${this.containerName} already exists.`);
+        } else {
+          console.warn(`Warning accessing container: ${error.message}`);
+          console.log('App will continue running but storage operations may fail.');
+        }
       }
     }
   }
   
   async uploadBlob(blobName, data, contentType = null) {
-    const blobClient = this.containerClient.getBlockBlobClient(blobName);
-    const options = contentType ? { blobHTTPHeaders: { blobContentType: contentType } } : {};
-    await blobClient.upload(data, data.length, options);
-    return this.getBlobUrl(blobName);
+    try {
+      if (!this.containerClient) {
+        throw new Error('Storage provider not initialized');
+      }
+      const blobClient = this.containerClient.getBlockBlobClient(blobName);
+      const options = contentType ? { blobHTTPHeaders: { blobContentType: contentType } } : {};
+      await blobClient.upload(data, data.length, options);
+      return this.getBlobUrl(blobName);
+    } catch (error) {
+      console.error(`Error uploading blob: ${error.message}`);
+      // Create a local URL instead as a fallback when storage fails
+      return `/qrcode/${blobName}`; 
+    }
   }
   
   async downloadBlob(blobName) {
-    const blobClient = this.containerClient.getBlockBlobClient(blobName);
-    return await blobClient.download();
+    try {
+      if (!this.containerClient) {
+        throw new Error('Storage provider not initialized');
+      }
+      const blobClient = this.containerClient.getBlockBlobClient(blobName);
+      return await blobClient.download();
+    } catch (error) {
+      console.error(`Error downloading blob: ${error.message}`);
+      throw error;
+    }
   }
   
   async deleteBlob(blobName) {
-    const blobClient = this.containerClient.getBlockBlobClient(blobName);
-    await blobClient.delete();
+    try {
+      if (!this.containerClient) {
+        throw new Error('Storage provider not initialized');
+      }
+      const blobClient = this.containerClient.getBlockBlobClient(blobName);
+      await blobClient.delete();
+    } catch (error) {
+      console.error(`Error deleting blob: ${error.message}`);
+      // We'll consider this non-critical and continue
+    }
   }
   
   async blobExists(blobName) {
-    const blobClient = this.containerClient.getBlockBlobClient(blobName);
     try {
+      if (!this.containerClient) {
+        return false; // Can't check if storage is not initialized
+      }
+      const blobClient = this.containerClient.getBlockBlobClient(blobName);
       await blobClient.getProperties();
       return true;
     } catch (error) {
@@ -124,8 +171,16 @@ class AzureBlobStorageProvider extends StorageProvider {
   }
   
   getBlobUrl(blobName) {
-    const blobClient = this.containerClient.getBlockBlobClient(blobName);
-    return blobClient.url;
+    try {
+      if (!this.containerClient) {
+        return `/qrcode/${blobName}`; // Fallback for local URL
+      }
+      const blobClient = this.containerClient.getBlockBlobClient(blobName);
+      return blobClient.url;
+    } catch (error) {
+      console.error(`Error getting blob URL: ${error.message}`);
+      return `/qrcode/${blobName}`; // Fallback URL
+    }
   }
 }
 

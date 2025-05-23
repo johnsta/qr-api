@@ -19,6 +19,7 @@ test-output/
 # Build output
 dist/
 build/
+deployment.zip
 
 # IDE
 .idea/
