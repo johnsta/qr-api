@@ -1,11 +1,14 @@
-# Testing Your QR Code API with httpYa### Using httpYac from Command Line
+
+# Testing Your QR Code API with httpYac
+
+### Using httpYac from Command Line
 
 ```bash
 # Run all requests in a file
 httpyac api-tests.http
 
 # Run a specific request
-httpyac api-tests.http --name "Health Check"
+httpyac api-tests.http --name "healthCheck"
 
 # Interactive mode (step through requests)
 httpyac api-tests.http --interactive
@@ -17,15 +20,15 @@ httpyac api-tests.http --interactive
 # Default runs on local URL (http://localhost:8000)
 httpyac api-tests.http
 
-# Override baseUrl for production testing
-httpyac api-tests.http --env-var "baseUrl=https://your-production-url.azurewebsites.net"
+# Override host for production testing
+httpyac api-tests.http --env-var "host=https://qrcode-api-app.azurewebsites.net"
 
 # Or use the test script with environment parameter
 ./test-api.sh local     # Uses http://localhost:8000
-./test-api.sh production  # Uses https://your-production-url.azurewebsites.net
+./test-api.sh production  # Uses https://qrcode-api-app.azurewebsites.net
 ```
 
-### Advanced Featuresains how to use httpYac to test your QR Code Generator API, both through VS Code and the command line.
+
 
 ## Installation
 

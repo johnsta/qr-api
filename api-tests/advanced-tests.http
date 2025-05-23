@@ -1,10 +1,12 @@
 // QR Code Generator API Tests
-@host = http://localhost:8000
+# @host = http://localhost:8000
+@host = https://qrcode-api-app.azurewebsites.net
 @apiPrefix = /api/qrcodes
 
 ### Health Check
-# This request checks if the API is running
-GET {{host}}/docs HTTP/1.1
+# This request checks the health of the API
+# @name healthCheck
+GET {{host}}/health HTTP/1.1
 
 ### 1. Create a QR Code
 # This request creates a new QR code with a URL
