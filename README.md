@@ -249,12 +249,11 @@ Options:
 
 ### Azure Deployment
 
-1. Update the parameters in `infra/bicep/parameters/dev.parameters.json`
-2. Run the deployment script:
+1. Run the deployment script:
 
 ```bash
-cd infra/scripts
-./deploy.sh -e dev
+chmod +x ./deploy.sh
+./deploy.sh
 ```
 
 ## License
