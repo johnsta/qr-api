@@ -1,293 +1,261 @@
-# QR Code Generator API
+# QR Code Generator API (Node.js)
 
-A FastAPI-based REST API for generating, storing, and managing QR codes with multiple storage backend options.
+A RESTful API service for generating, storing, and managing QR codes with multiple storage backends.
 
 ## Features
 
-- Generate QR codes from text/URL data
+- Generate QR codes from URLs, text, vCard data, or WiFi information
+- Store QR codes in Azure Blob Storage or MinIO (S3-compatible storage)
+- Retrieve QR codes and metadata
 - Custom QR code size
-- Upload pre-generated QR codes
-- Retrieve QR code images
-- Track QR code metadata (creation time, access count)
-- Multiple storage backends:
-  - MinIO (open-source, S3-compatible - great for local development)
-  - Azure Blob Storage (for production deployment)
-- Managed Identity authentication (for Azure)
-- Docker Compose setup for local development
-- Comprehensive API testing using httpYac
+- Track QR code access statistics
+- Health endpoint for monitoring
 
-## Prerequisites
+## Technologies
 
-- Python 3.9+
-- Docker and Docker Compose (for local MinIO development)
-- Azure CLI and subscription (for Azure deployment only)
+- Node.js
+- Express.js
+- Azure Blob Storage / MinIO
+- QRCode library
+- Docker & Docker Compose
+
+## Requirements
+
+- Node.js 18.x or higher
+- npm or yarn
+- Docker and Docker Compose (for local development with MinIO)
+- Azure account (for cloud deployment)
 
 ## Local Development
 
-### Option 1: Using Docker Compose with MinIO (Recommended)
+### Setup with Docker Compose
 
-1. **Clone the repository**
+1. Clone this repository
+2. Run the services using Docker Compose:
 
-2. **Set up environment variables**
-   ```bash
-   # Copy the sample env file
-   cp .env.sample .env
-   ```
-
-3. **Start the API and MinIO with Docker Compose**
-   ```bash
-   docker-compose up -d
-   ```
-
-   The API will be available at http://localhost:8000
-   The MinIO console will be available at http://localhost:9001 (user: minioadmin, password: minioadmin)
-
-### Option 2: Running Locally with Python
-
-1. **Clone the repository**
-
-2. **Install dependencies**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-3. **Setup MinIO**
-   
-   Either:
-   - Run MinIO using Docker: 
-     ```bash
-     docker run -p 9000:9000 -p 9001:9001 quay.io/minio/minio server /data --console-address ":9001"
-     ```
-   - Or install MinIO directly on your system
-
-4. **Set up environment variables**
-   ```bash
-   # Copy the sample env file and edit as needed
-   cp .env.sample .env
-   ```
-
-5. **Run the application**
-   ```bash
-   uvicorn app:app --reload
-   ```
-
-   The API will be available at http://localhost:8000
-
-6. **API Documentation**
-   
-   Visit http://localhost:8000/docs for the Swagger UI documentation.
-
-## Deployment to Azure
-
-1. **Login to Azure**
-   ```bash
-   az login
-   ```
-
-2. **Create Azure resources manually**
-   ```bash
-   # Create resource group
-   az group create --name qr-code-api-rg --location eastus
-   
-   # Create storage account
-   az storage account create --name qrcodeapistg --resource-group qr-code-api-rg --location eastus --sku Standard_LRS
-   
-   # Create App Service plan
-   az appservice plan create --name qr-code-api-plan --resource-group qr-code-api-rg --sku B1 --is-linux
-   
-   # Create Web App
-   az webapp create --resource-group qr-code-api-rg --plan qr-code-api-plan --name your-qr-code-api --runtime "PYTHON|3.9"
-   
-   # Configure environment variables
-   az webapp config appsettings set --resource-group qr-code-api-rg --name your-qr-code-api \
-     --settings STORAGE_TYPE=azure CONTAINER_NAME=qrcodes AZURE_STORAGE_ACCOUNT_NAME=qrcodeapistg
-   
-   # Enable managed identity
-   az webapp identity assign --resource-group qr-code-api-rg --name your-qr-code-api
-   
-   # Get the identity principal ID
-   IDENTITY_PRINCIPAL_ID=$(az webapp identity show --resource-group qr-code-api-rg --name your-qr-code-api --query principalId -o tsv)
-   
-   # Get the storage account ID
-   STORAGE_ACCOUNT_ID=$(az storage account show --name qrcodeapistg --resource-group qr-code-api-rg --query id -o tsv)
-   
-   # Grant the identity access to the storage account
-   az role assignment create --assignee $IDENTITY_PRINCIPAL_ID --role "Storage Blob Data Contributor" --scope $STORAGE_ACCOUNT_ID
-   ```
-
-3. **Deploy the code to Azure App Service**
-   ```bash
-   # Create a zip package
-   zip -r api.zip app.py requirements.txt
-   
-   # Deploy the package
-   az webapp deployment source config-zip --resource-group qr-code-api-rg --name your-qr-code-api --src ./api.zip
-   ```
-
-## Testing the API
-
-This project includes comprehensive API testing using httpYac, both through VS Code and the command line.
-
-### Testing Files
-
-- `api-tests.http` - Main test file with dynamic variables and complete test flow
-- `advanced-tests.http` - Enhanced tests with environment management
-- `test-api.sh` - Automated test script
-- `http-testing-guide.md` - Detailed testing guide
-
-### Using httpYac
-
-1. **Install httpYac**:
-   ```bash
-   # VS Code Extension
-   # Install from VS Code Extension Marketplace: search for "httpYac"
-   
-   # Command Line
-   npm install -g httpyac
-   ```
-
-2. **Run Tests**:
-   ```bash
-   # Run all tests
-   httpyac api-tests.http
-   
-   # Run interactive mode
-   httpyac api-tests.http --interactive
-   
-   # Run tests with specified environment
-   httpyac api-tests.http --env local
-   
-   # Run automated test script
-   ./test-api.sh
-   ```
-
-3. **View Test Results**:
-   The test results will appear in the terminal, and any downloaded QR codes will be saved to the `test-output` folder.
-
-For more detailed information, see `http-testing-guide.md`.
-
-## Storage Configuration
-
-The API supports two storage backends:
-
-### MinIO (Default)
-
-MinIO is an open-source, S3-compatible object storage that's perfect for local development and testing. It provides:
-
-- Easy local setup with Docker
-- S3-compatible API
-- Web-based management console
-- No cloud dependencies
-
-Configure MinIO in your `.env` file:
-```
-STORAGE_TYPE=minio
-CONTAINER_NAME=qrcodes
-MINIO_ENDPOINT=localhost:9000
-MINIO_ACCESS_KEY=minioadmin
-MINIO_SECRET_KEY=minioadmin
-MINIO_SECURE=false
+```bash
+docker-compose up -d
 ```
 
-### Azure Blob Storage
+This will start:
+- MinIO at http://localhost:9000 (Console: http://localhost:9001)
+- QR Code API at http://localhost:8000
 
-When deploying to production on Azure, you can use Azure Blob Storage:
+Note: Environment variables for the API are already configured in the docker-compose.yml file. No need to create a .env file for Docker Compose setup.
 
-- Managed by Azure
-- Scalable and reliable
-- Works seamlessly with other Azure services
-- Supports Managed Identity authentication
+### Setup without Docker
 
-Configure Azure Blob Storage in your `.env` file:
+When not using Docker, you have two main options for storage:
+
+#### Option 1: Use Azure Storage
+
+You can connect to Azure Storage using either a connection string (if allowed by your organization's policies) or Managed Identity (recommended for security).
+
+1. Clone this repository
+2. Install dependencies:
+
+```bash
+npm install
+```
+
+3. Create a `.env` file with your configuration:
+
+```bash
+# Copy the example environment file
+cp .env.example .env
+
+# Edit the .env file with Azure storage settings
+nano .env  # or use your preferred editor
+```
+
+4. Configure the `.env` file to use Azure Storage:
+
+**Option A: Using Connection String (if allowed by your organization)**
 ```
 STORAGE_TYPE=azure
 CONTAINER_NAME=qrcodes
-AZURE_STORAGE_CONNECTION_STRING=your_connection_string  # For local development
-AZURE_STORAGE_ACCOUNT_NAME=your_storage_account_name    # For production with Managed Identity
+AZURE_STORAGE_ACCOUNT_NAME=yourstorageaccount
+AZURE_STORAGE_CONNECTION_STRING=your_connection_string
 ```
+
+**Option B: Using Passwordless Authentication with DefaultAzureCredential (recommended)**
+```
+STORAGE_TYPE=azure
+CONTAINER_NAME=qrcodes
+AZURE_STORAGE_ACCOUNT_NAME=yourstorageaccount
+
+# No client ID or secret needed - uses your Azure CLI login credentials
+# See: https://aka.ms/azsdk/js/identity/defaultazurecredential
+```
+
+You'll need to sign in with Azure CLI (`az login`) and have the "Storage Blob Data Contributor" role assigned to your account for the storage resource.
+
+> **Automated Setup**: Instead of configuring this manually, you can run our developer setup script:
+> ```bash
+> # Make sure you're logged in to Azure first
+> az login
+> 
+> # Run the setup script
+> ./dev-setup-storagetype-azure.sh
+> ```
+> This will create all the necessary Azure resources and configure your local environment automatically.
+
+5. Run the API:
+
+```bash
+npm start
+```
+
+#### Option 2: Connect to MinIO
+
+If you want to use MinIO for local development:
+
+1. Clone this repository
+2. Install dependencies:
+
+```bash
+npm install
+```
+
+3. Create a `.env` file and configure it to point to your MinIO instance:
+
+```
+STORAGE_TYPE=minio
+CONTAINER_NAME=qrcodes
+MINIO_ENDPOINT=localhost:9000  # or your custom MinIO host
+MINIO_ACCESS_KEY=minioadmin
+MINIO_SECRET_KEY=minioadmin
+MINIO_SECURE=false  # Set to true if using HTTPS
+```
+
+> **Automated Setup**: Instead of configuring this manually, you can run our developer setup script:
+> ```bash
+> # Make sure Docker is running first
+> ./dev-setup-storagetype-minio.sh
+> ```
+> This will configure your local environment for MinIO and offer to start Docker containers if needed.
+
+4. Run the API:
+
+```bash
+npm start
+```
+
+For most local development cases, we recommend using the Docker Compose setup as it's simpler and ensures all dependencies are properly configured.
 
 ## API Endpoints
 
-### Generate QR Code
-```http
-POST /api/qrcodes
-Content-Type: application/json
+### Create a QR Code
 
+```
+POST /api/qrcodes
+```
+
+Request body:
+```json
 {
   "data": "https://example.com",
   "size": 300
 }
 ```
 
-### Upload QR Code
-```http
-PUT /api/qrcodes/{code_id}
-Content-Type: image/png
-X-QR-Data: https://example.com
-X-QR-Size: 300
+### Upload a QR Code
 
-(binary PNG payload)
+```
+PUT /api/qrcodes/{code_id}
 ```
 
-### Get QR Code
-```http
+Headers:
+- `X-QR-Data`: The data encoded in the QR code
+- `X-QR-Size`: The size of the QR code (default: 300)
+
+Body: QR code image file (PNG)
+
+### Get a QR Code
+
+```
 GET /api/qrcodes/{code_id}
 ```
 
-### Get Metadata
-```http
+### Get QR Code Metadata
+
+```
 GET /api/qrcodes/{code_id}/metadata
 ```
 
-### Check if QR Code Exists
-```http
+### Check if a QR Code Exists
+
+```
 HEAD /api/qrcodes/{code_id}
 ```
 
-### Delete QR Code
-```http
+### Delete a QR Code
+
+```
 DELETE /api/qrcodes/{code_id}
 ```
 
-### Check Existence
-```http
-HEAD /api/qrcodes/{code_id}
+### Health Check
+
+```
+GET /health
 ```
 
-### Delete QR Code
-```http
-DELETE /api/qrcodes/{code_id}
+## Testing
+
+Run the test script:
+
+```bash
+./test-api.sh
 ```
 
-## Security Features
+Or run the unit tests:
 
-- HTTPS only
-- Managed Identity authentication to Azure Storage
-- TLS 1.2 enforcement
-- Secure connection strings handling
-- No public access to storage container
+```bash
+npm test
+```
 
-## Monitoring
+## Deployment
 
-- Application Insights integration
-- Access tracking
-- Usage metrics
+### Setting up Local Development with Azure Storage
 
-## Infrastructure as Code
+To help developers configure their local environment to connect to Azure Storage, we've provided a setup script:
 
-The `infra/main.bicep` file contains the complete infrastructure definition:
-- App Service (Linux)
-- Storage Account
-- Application Insights
-- Managed Identity
-- RBAC assignments
+```bash
+# Run the setup script (login to Azure first with 'az login')
+./dev-setup-storagetype-azure.sh
+```
 
-## CI/CD
+This script will:
+1. Create a resource group in your Azure subscription
+2. Create an Azure Storage account with local authentication disabled (for policy compliance)
+3. Create a user-assigned managed identity
+4. Assign the necessary RBAC roles
+5. Create a container for QR codes
+6. Set up passwordless authentication for local development using your Azure CLI credentials
+7. Configure your local `.env` file automatically
 
-GitHub Actions workflow is configured for automated deployments:
-- Triggers on push to main branch
-- Builds and tests the application
-- Deploys to Azure App Service
+You can customize the script with various options:
+```bash
+./dev-setup-storagetype-azure.sh --help
+```
+
+Options:
+- `--resource-group` or `-g`: Resource group name (default: qr-api-resources)
+- `--location` or `-l`: Azure location (default: southeastasia)
+- `--storage-account` or `-s`: Storage account name (default: qrcodeapistorage)
+- `--container-name` or `-c`: Container name (default: qrcodes)
+- `--identity-name` or `-i`: Managed identity name (default: qr-api-identity)
+
+### Azure Deployment
+
+1. Update the parameters in `az-qr-api-infra/bicep/parameters/dev.parameters.json`
+2. Run the deployment script:
+
+```bash
+cd az-qr-api-infra/scripts
+./deploy.sh -e dev
+```
 
 ## License
 

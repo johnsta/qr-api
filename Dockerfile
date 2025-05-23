@@ -1,10 +1,14 @@
-FROM python:3.11-slim
+FROM node:18-slim
 
 WORKDIR /app
 
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+COPY package*.json ./
+RUN npm install --production
 
-COPY app.py .
+# Copy application code
+COPY app.js .
+# Copy example environment file (can be overridden by environment variables)
+COPY .env.example .env
 
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
+# Command to run the application
+CMD ["node", "app.js"]

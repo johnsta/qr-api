@@ -1,6 +1,7 @@
+# filepath: /Users/johnsta/repos/qr-api/test-api.sh.new
 #!/bin/zsh
 
-# Test QR Code API script with enhanced features
+# Test QR Code API script with enhanced features (Node.js version)
 
 echo "🧪 Testing QR Code API with httpYac..."
 echo "⚙️  Environment: ${1:-local}"

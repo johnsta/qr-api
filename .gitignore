@@ -1,65 +1,35 @@
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
 
-# Virtual Environment
-venv/
-env/
-ENV/
+# Environment variables
 .env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 
-# IDE files
+# Testing
+coverage/
+test-output/
+
+# Build output
+dist/
+build/
+
+# IDE
 .idea/
 .vscode/
-*.swp
-*.swo
+*.sublime-project
+*.sublime-workspace
+
+# OS files
 .DS_Store
+Thumbs.db
 
-# MinIO and Docker related
-.minio.sys/
-minio-data/
-minio-config/
-
-# Azure Storage related
-.azure/
-
-# Project specific
-*.qr
-*.png
-!test-qr.png
-
-# Log files
-*.log
+# Logs
 logs/
-
-# Temporary files
-tmp/
-temp/
-
-# HTTPYAC test related
-.httpyac/
-
-# Private info
-# Keep test-qr.png but ignore other PNG files
-!test-qr.png
-secrets.*.json
-credentials.json
+*.log
