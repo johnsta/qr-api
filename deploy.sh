@@ -5,7 +5,7 @@ set -euo pipefail
 # Configuration
 # ---------------------------------------------------
 RESOURCE_GROUP=${RESOURCE_GROUP:-qrcode-api-rg}
-LOCATION=${LOCATION:-southeastasia}
+LOCATION=${LOCATION:-eastus}
 PLAN_NAME=${PLAN_NAME:-qrcode-api-plan}
 APP_NAME=${APP_NAME:-qrcode-api-app}
 STORAGE_ACCOUNT_NAME=${STORAGE_ACCOUNT_NAME:-qrcodeapistoragedev}
