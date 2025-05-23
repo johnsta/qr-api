@@ -39,7 +39,7 @@ az appservice plan create \
   --name "$PLAN_NAME" \
   --resource-group "$RESOURCE_GROUP" \
   --is-linux \
-  --sku B1
+  --sku S1
 
 # ---------------------------------------------------
 # 4. Create Web App (Node.js)
@@ -120,3 +120,28 @@ az webapp deploy \
   --type zip
 
 echo "✅ Deployment complete! Your app is live at https://$APP_NAME.azurewebsites.net"
+
+echo "➤ Configuring autoscale for App Service Plan..."
+
+az monitor autoscale create \
+  --resource-group "$RESOURCE_GROUP" \
+  --resource "$PLAN_NAME" \
+  --resource-type Microsoft.Web/serverfarms \
+  --name "${PLAN_NAME}-autoscale" \
+  --min-count 1 \
+  --max-count 3 \
+  --count 1
+
+# Add scale out rule (CPU > 70%)
+az monitor autoscale rule create \
+  --resource-group "$RESOURCE_GROUP" \
+  --autoscale-name "${PLAN_NAME}-autoscale" \
+  --scale out 1 \
+  --condition "Percentage CPU > 70 avg 5m"
+
+# Add scale in rule (CPU < 30%)
+az monitor autoscale rule create \
+  --resource-group "$RESOURCE_GROUP" \
+  --autoscale-name "${PLAN_NAME}-autoscale" \
+  --scale in 1 \
+  --condition "Percentage CPU < 30 avg 5m"

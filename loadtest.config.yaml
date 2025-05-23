@@ -1,0 +1,47 @@
+version: v0.1
+displayName: QR Code API Load Test
+description: Locust load test
+testPlan: locustfile.py
+testType: Locust
+engineInstances: 1
+env:
+  - name: LOCUST_USERS
+    value: '500'
+  - name: LOCUST_RUN_TIME
+    value: '300'
+  - name: LOCUST_SPAWN_RATE
+    value: '10'
+resourceId: >-
+  /subscriptions/9396393a-08b3-42c5-9298-176f088bc78d/resourceGroups/my-load-tests/providers/Microsoft.LoadTestService/loadTests/my-load-tests
+secrets:
+  - name: HOST
+    value: ''
+    type: SECRET_VALUE
+  - name: DEBUG_MODE
+    value: ''
+    type: SECRET_VALUE
+configurationFiles:
+  - requirements.txt
+appComponents:
+  - resourceId: >-
+      /subscriptions/9396393a-08b3-42c5-9298-176f088bc78d/resourceGroups/qrcode-api-rg/providers/Microsoft.Storage/storageAccounts/qrcodeapistoragedev
+    resourceName: qrcodeapistoragedev
+    resourceType: Microsoft.Storage/storageAccounts
+    resourceGroup: qrcode-api-rg
+    subscriptionId: 9396393a-08b3-42c5-9298-176f088bc78d
+    kind: StorageV2
+  - resourceId: >-
+      /subscriptions/9396393a-08b3-42c5-9298-176f088bc78d/resourceGroups/qrcode-api-rg/providers/Microsoft.Web/serverFarms/qrcode-api-plan
+    resourceName: qrcode-api-plan
+    resourceType: Microsoft.Web/serverFarms
+    resourceGroup: qrcode-api-rg
+    subscriptionId: 9396393a-08b3-42c5-9298-176f088bc78d
+    kind: linux
+  - resourceId: >-
+      /subscriptions/9396393a-08b3-42c5-9298-176f088bc78d/resourceGroups/qrcode-api-rg/providers/Microsoft.Web/sites/qrcode-api-app
+    resourceName: qrcode-api-app
+    resourceType: Microsoft.Web/sites
+    resourceGroup: qrcode-api-rg
+    subscriptionId: 9396393a-08b3-42c5-9298-176f088bc78d
+    kind: app,linux
+testId: d3bb1259-d77f-4a42-af8a-5de051d78f2c

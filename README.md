@@ -256,6 +256,13 @@ chmod +x ./deploy.sh
 ./deploy.sh
 ```
 
+## Demo
+
+**Delete the entire autoscale setting (removes all rules for the plan)**
+az monitor autoscale delete \
+  --resource-group "$RESOURCE_GROUP" \
+  --name "${PLAN_NAME}-autoscale"
+
 ## License
 
 MIT
