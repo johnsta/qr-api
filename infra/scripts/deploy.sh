@@ -1,4 +1,4 @@
-# filepath: /Users/johnsta/repos/qr-api/az-qr-api-infra/scripts/deploy.sh.new
+# filepath: /Users/johnsta/repos/qr-api/infra/scripts/deploy.sh
 #!/usr/bin/env bash
 set -euo pipefail
 

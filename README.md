@@ -249,11 +249,11 @@ Options:
 
 ### Azure Deployment
 
-1. Update the parameters in `az-qr-api-infra/bicep/parameters/dev.parameters.json`
+1. Update the parameters in `infra/bicep/parameters/dev.parameters.json`
 2. Run the deployment script:
 
 ```bash
-cd az-qr-api-infra/scripts
+cd infra/scripts
 ./deploy.sh -e dev
 ```
 

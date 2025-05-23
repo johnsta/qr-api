@@ -37,7 +37,7 @@ This project contains Bicep templates for provisioning and deploying the Azure i
 ## Deployment Instructions
 
 1. Clone the repository.
-2. Navigate to the `az-qr-api-infra` directory.
+2. Navigate to the `infra` directory.
 3. Deploy the infrastructure using the provided scripts.
 
 ### Using the Shell Script (macOS/Linux)
