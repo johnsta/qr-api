@@ -31,16 +31,15 @@ try {
 NODECODE
 
 # Check for environment configuration
-if [[ ! -f .env ]] && [[ -f .env.example ]]; then
-  echo ">>> Creating .env file from .env.example"
-  cp .env.example .env
-  
-  # If running in Azure, update environment settings
-  if [[ -n "${WEBSITES_PORT:-}" ]]; then
-    echo ">>> Configuring for Azure environment"
-    # Use sed to replace MinIO with Azure storage in the .env file
-    sed -i 's/STORAGE_TYPE=minio/STORAGE_TYPE=azure/' .env
-    sed -i 's/NODE_ENV=development/NODE_ENV=production/' .env
+if [[ -n "${WEBSITES_PORT:-}" ]]; then
+  # Running in Azure App Service - use environment variables from App Service
+  echo ">>> Running in Azure App Service - using App Service environment variables"
+else
+  # Local development
+  if [[ -f .env ]]; then
+    echo ">>> Found .env file for local development"
+  else
+    echo ">>> Note: No .env file found for local development. Using environment variables only."
   fi
 fi
 
