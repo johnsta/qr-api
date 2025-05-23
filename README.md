@@ -1,4 +1,4 @@
-# QR Code Generator API (Node.js)
+# QR Code Generator API
 
 A RESTful API service for generating, storing, and managing QR codes with multiple storage backends.
 
