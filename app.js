@@ -578,7 +578,7 @@ app.get('/health', (req, res) => {
     status: 'healthy',
     timestamp: new Date().toISOString(),
     storage_type: STORAGE_TYPE,
-    version: '1.0.0'
+    version: '1.1.0'
   });
 });
 
